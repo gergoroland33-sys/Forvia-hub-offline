@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Napi Jelentés Classic</title>
 <style>
-/* --- EREDETI, KOMPAKT DESIGN --- */
+/* --- EREDETI DESIGN KIEMELT IDŐVEL --- */
 :root{--bg:#0a0f1e;--panel:#161e31;--accent:#3b82f6;--success:#10b981;--error:#ef4444;--text:#f8fafc;}
 body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0;padding-bottom:120px;}
 
-/* FEJLÉC (Monitor) */
 .monitor-frame{
 position:sticky; top:0; z-index:100; background:var(--bg);
 border-bottom:2px solid var(--accent); padding:10px;
@@ -23,7 +22,6 @@ border-radius:8px; text-align:center; border:1px solid #2d3748;
 .time-val{font-family:'Courier New',monospace; font-size:1.8rem; font-weight:900; display:block; line-height: 1;}
 .label{font-size:0.6rem; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;}
 
-/* Hatékonyság vezérlő (Kicsi gombokkal) */
 .eff-control{
 background:rgba(59,130,246,0.1); padding:5px; border-radius:8px;
 display:flex; align-items:center; justify-content:center; gap:10px;
@@ -35,7 +33,6 @@ display: flex; align-items: center; justify-content: center; cursor: pointer;
 }
 .eff-val-display { font-size: 1.4rem; font-weight: 900; color: var(--success); min-width: 50px; text-align: center; }
 
-/* TÁBLÁZAT */
 .table-header{
 display:grid; grid-template-columns:1fr 1fr 1fr 1fr 30px;
 padding:10px 5px; background:#1a2234; font-size:0.6rem;
@@ -52,23 +49,28 @@ display:grid; grid-template-columns:1fr 1fr 1fr 1fr 30px;
 gap:4px; align-items:center;
 }
 
-/* MEZŐK (Eredeti stílus) */
 input{
 width:100%; background:#0f172a; border:1px solid #334155;
 border-radius:6px; padding:8px 0; color:#fff; font-size:0.95rem;
 text-align:center; box-sizing:border-box; font-weight:bold;
 }
 input:focus{border-color:var(--accent); outline:none; background:#1e293b;}
-input.downtime{border-color:#78350f; color:#fbbf24;} /* Sárgás az állásidőnek */
+input.downtime{border-color:#78350f; color:#fbbf24;}
 
+/* --- MÓDOSÍTÁS: KIEMELT IDŐ KIJELZÉS --- */
 .row-time-info{
-margin-top:5px; padding-top:5px; border-top:1px dashed #334155;
+margin-top:8px; padding:8px;
+background: rgba(0,0,0,0.3); /* Sötétebb háttér */
+border-radius: 6px;
 display:flex; justify-content:space-between; align-items:center;
-font-size:0.8rem; color:var(--accent);
+font-size:0.85rem; color:#94a3b8;
 }
-.row-time-val{font-weight:bold; font-family:monospace; font-size:1.1rem;}
+.row-time-val{
+font-weight:900; font-family:monospace; font-size:1.3rem;
+color: #4ade80; /* Fényes neon zöld */
+text-shadow: 0 0 10px rgba(74, 222, 128, 0.3); /* Enyhe ragyogás */
+}
 
-/* GOMBOK */
 .btn-add{
 width:calc(100% - 20px); margin:10px; padding:15px;
 background:var(--accent); color:white; border:none;
@@ -117,10 +119,8 @@ height:34px; border-radius:6px; font-weight:bold; cursor:pointer;
 <script>
 let hatékonyság = 87;
 
-// --- BETÖLTÉS ÉS MENTÉS KEZELÉSE ---
 window.onload = function() {
 try {
-// Adatok visszatöltése
 const savedRows = localStorage.getItem('forvia_rows_v2');
 const savedEff = localStorage.getItem('forvia_eff_v2');
 
@@ -138,7 +138,6 @@ addRow();
 addRow();
 }
 } catch (e) {
-console.log("Offline mód - mentés nem elérhető");
 addRow();
 }
 calculate();
@@ -158,12 +157,9 @@ d: div.querySelector('.down').value
 try {
 localStorage.setItem('forvia_rows_v2', JSON.stringify(rows));
 localStorage.setItem('forvia_eff_v2', hatékonyság);
-} catch (e) {} // Csendes hiba, ha tiltva van a mentés
-
+} catch (e) {}
 calculate();
 }
-
-// --- MŰKÖDÉS ---
 
 function changeEff(val) {
 hatékonyság += val;
@@ -180,7 +176,6 @@ function addRow(data = {t:'', q:'', p:'1', d:''}) {
 const list = document.getElementById('entryList');
 const div = document.createElement('div');
 div.className = 'entry-row';
-// Itt a rubrikák, beleértve a PANEL-t is!
 div.innerHTML = `
 <div class="input-grid">
 <input type="number" class="takt" placeholder="mp" value="${data.t}" oninput="save()" inputmode="decimal">
@@ -190,7 +185,7 @@ div.innerHTML = `
 <button class="btn-del" onclick="removeRow(this)">×</button>
 </div>
 <div class="row-time-info">
-<span>Számolt idő:</span>
+<span>SZÁMOLT IDŐ:</span>
 <span class="row-time-val">00:00</span>
 </div>
 `;
@@ -212,9 +207,8 @@ const q = parseFloat(row.querySelector('.qty').value) || 0;
 let p = parseFloat(row.querySelector('.panel').value);
 const d = parseFloat(row.querySelector('.down').value) || 0;
 
-if (!p || p === 0) p = 1; // Osztás 0-val védelem
+if (!p || p === 0) p = 1;
 
-// KÉPLET: ((Takt * Darab) / Panel) / Hatékonyság + (Állás * 60)
 const workSec = ((t * q) / p) / effFactor;
 const downSec = d * 60;
 const rowSec = workSec + downSec;
@@ -223,7 +217,6 @@ row.querySelector('.row-time-val').innerText = formatTime(rowSec);
 totalSec += rowSec;
 });
 
-// Összesítés
 const shiftSec = 12 * 3600;
 const missSec = Math.max(0, shiftSec - totalSec);
 
@@ -233,8 +226,7 @@ const mEl = document.getElementById('missingTime');
 tEl.innerText = formatTime(totalSec);
 mEl.innerText = formatTime(missSec);
 
-// Színezés
-mEl.style.color = missSec > 0 ? '#ef4444' : '#10b981'; // Piros ha van hiány, Zöld ha nincs
+mEl.style.color = missSec > 0 ? '#ef4444' : '#10b981';
 tEl.style.color = totalSec > shiftSec ? '#ef4444' : '#10b981';
 }
 
