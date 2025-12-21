@@ -6,8 +6,42 @@
 <title>Maszk Finder</title>
 <style>
 body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:white;margin:0;padding:20px;text-align:center;}
-input{width:100%;padding:15px;font-size:1.5rem;background:#1e293b;border:2px solid #3b82f6;color:white;border-radius:12px;text-align:center;box-sizing:border-box;text-transform:uppercase;margin-bottom:20px;}
-#eredmeny{display:none;background:#1e293b;padding:25px;border-radius:15px;border-left:8px solid #fbbf24;animation:pop 0.3s ease;}
+
+/* Kereső doboz konténer */
+.search-container { position: relative; max-width: 500px; margin: 0 auto; }
+
+input{width:100%;padding:15px;font-size:1.5rem;background:#1e293b;border:2px solid #3b82f6;color:white;border-radius:12px;text-align:center;box-sizing:border-box;text-transform:uppercase;margin-bottom:5px;}
+
+/* Javaslatok lista stílusa */
+#javaslatok {
+display: none;
+position: absolute;
+top: 100%; left: 0; right: 0;
+background: #1e293b;
+border: 1px solid #3b82f6;
+border-top: none;
+border-radius: 0 0 12px 12px;
+z-index: 100;
+max-height: 250px;
+overflow-y: auto;
+box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+.tipp {
+padding: 15px;
+border-bottom: 1px solid #334155;
+cursor: pointer;
+font-size: 1.2rem;
+font-weight: bold;
+color: #94a3b8;
+text-align: left;
+padding-left: 20px;
+}
+.tipp:hover { background: #3b82f6; color: white; }
+.tipp:last-child { border-bottom: none; }
+.tipp span { color: #3b82f6; font-weight: normal; font-size: 0.9rem; float: right; }
+.tipp:hover span { color: white; }
+
+#eredmeny{display:none;background:#1e293b;padding:25px;border-radius:15px;border-left:8px solid #fbbf24;animation:pop 0.3s ease; margin-top: 20px; max-width: 500px; margin-left: auto; margin-right: auto;}
 h1{color:#3b82f6;margin-bottom:30px;}
 .label{color:#94a3b8;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;}
 .big-val{font-size:3.5rem;font-weight:900;color:#fbbf24;line-height:1;margin:10px 0;}
@@ -20,7 +54,10 @@ h1{color:#3b82f6;margin-bottom:30px;}
 
 <h1>Maszk Kereső</h1>
 
-<input type="text" id="inp" placeholder="PL: M10..." oninput="keres()" autocomplete="off">
+<div class="search-container">
+<input type="text" id="inp" placeholder="PL: M10..." oninput="gepeles()" autocomplete="off">
+<div id="javaslatok"></div>
+</div>
 
 <div id="eredmeny">
 <div class="label">SZEKRÉNY</div>
@@ -29,79 +66,131 @@ h1{color:#3b82f6;margin-bottom:30px;}
 <div class="label">FAKK SZÁMA</div>
 <div class="sub-val" id="fakk">-</div>
 </div>
+<div style="margin-top:15px;">
+<div class="label">KERESETT MASZK</div>
+<div style="color:#3b82f6; font-weight:bold;" id="maszkID">-</div>
+</div>
 </div>
 
-<div id="status"></div>
+<div id="status">Betöltés...</div>
 
 <script>
-let adatb = [];
-let fejléc = [];
+let adatb = []; // A teljes CSV táblázat sorai
+let fejléc = []; // Az első sor (Szekrény nevek)
+let maszkLista = []; // Csak a maszk nevek (pl. M1050, M2000) a kereséshez
 
-// Itt olvassuk be a CSV-t. A %20 jelenti a szóközt!
+// CSV betöltése
 fetch('Maszk%202026.csv')
 .then(response => {
 if (!response.ok) throw new Error("A CSV fájl nem található!");
 return response.text();
 })
 .then(szoveg => {
-adatb = szoveg.split('\n');
-// Az első sor a fejléc (Szekrény számok)
+adatb = szoveg.split('\n').filter(r => r.trim() !== ''); // Üres sorok kuka
+
+if(adatb.length > 0) {
 fejléc = adatb[0].split(';');
+
+// Összes maszk kigyűjtése a javaslatokhoz
+for (let i = 1; i < adatb.length; i++) {
+const cellak = adatb[i].split(';');
+for (let j = 0; j < cellak.length; j++) {
+const adat = cellak[j].trim().toUpperCase();
+// Ha az adat 'M' betűvel kezdődik, akkor az egy maszk
+if (adat.length > 1 && adat.startsWith('M')) {
+maszkLista.push(adat);
+}
+}
+}
+// Duplikációk törlése (hogy ne legyen kétszer ugyanaz a listában)
+maszkLista = [...new Set(maszkLista)].sort();
+
 document.getElementById('status').style.color = '#10b981';
-document.getElementById('status').innerText = "Adatbázis betöltve.";
+document.getElementById('status').innerText = `Adatbázis kész: ${maszkLista.length} maszk.`;
+}
 })
 .catch(hiba => {
-document.getElementById('status').innerText = "HIBA: A 'Maszk 2026.csv' nem olvasható. Ellenőrizd a mappát!";
+document.getElementById('status').innerText = "HIBA: A 'Maszk 2026.csv' nem olvasható.";
 });
 
-function keres() {
+// Ez fut le minden billentyűleütéskor
+function gepeles() {
 const kulcs = document.getElementById('inp').value.trim().toUpperCase();
-const doboz = document.getElementById('eredmeny');
+const listaDoboz = document.getElementById('javaslatok');
+const eredmenyDoboz = document.getElementById('eredmeny');
 
-if (kulcs.length < 2) {
-doboz.style.display = 'none';
+listaDoboz.innerHTML = ''; // Lista törlése
+
+if (kulcs.length < 1) {
+listaDoboz.style.display = 'none';
+eredmenyDoboz.style.display = 'none';
 return;
 }
 
-// Végigmegyünk a sorokon (az 1. sortól kezdve)
+// Keressük meg azokat a maszkokat, amik tartalmazzák a beírt szöveget
+// Csak az első 10 találatot mutatjuk, hogy ne legyen kilométeres a lista
+const talalatok = maszkLista.filter(m => m.includes(kulcs)).slice(0, 10);
+
+if (talalatok.length > 0) {
+listaDoboz.style.display = 'block';
+talalatok.forEach(maszk => {
+const div = document.createElement('div');
+div.className = 'tipp';
+div.innerHTML = `${maszk} <span>Kiválasztás &rarr;</span>`;
+// Ha rákattint, töltse be
+div.onclick = function() {
+document.getElementById('inp').value = maszk;
+kereses(maszk); // Indítjuk a részletes keresést
+listaDoboz.style.display = 'none'; // Lista eltűnik
+};
+listaDoboz.appendChild(div);
+});
+} else {
+listaDoboz.style.display = 'none';
+}
+}
+
+// Ez keresi meg a pontos helyet (Szekrény, Fakk)
+function kereses(konkretMaszk) {
+// Ha nem paraméterként jött, akkor a mezőből olvassuk
+const kulcs = konkretMaszk || document.getElementById('inp').value.trim().toUpperCase();
+const doboz = document.getElementById('eredmeny');
+
 let talalat = false;
+
 for (let i = 1; i < adatb.length; i++) {
 const sor = adatb[i].split(';');
 
-// Végigmegyünk az oszlopokon
 for (let j = 0; j < sor.length; j++) {
-// Ha megvan a Maszk ID
 if (sor[j] && sor[j].trim().toUpperCase() === kulcs) {
-
-// Kiszámoljuk, melyik szekrényhez tartozik
-// A CSV logika: Fakk;Maszk;Fakk;Maszk...
-// Tehát a Maszk indexe (j) mindig páratlan (1, 3, 5...)
-// A hozzá tartozó Szekrény indexe a fejlécben: (j-1)
-// VAGY ha a fejléc másképp van: oszlop pár indexe * 2
 
 const oszlopParIndex = Math.floor(j / 2);
 const fejlecIndex = oszlopParIndex * 2;
 
-// Ha a fejlécben üres a cella, akkor az előzőt vesszük (egyesített cellák miatt)
 let szekrenyNev = fejléc[fejlecIndex];
 if(!szekrenyNev || szekrenyNev.trim() === "") {
-szekrenyNev = (oszlopParIndex + 1) + ". Szekrény"; // Vészmegoldás
+szekrenyNev = (oszlopParIndex + 1) + ". Szekrény";
 }
 
-const fakkSzam = sor[j-1]; // A fakk száma mindig a maszk előtt van
+const fakkSzam = sor[j-1];
 
 document.getElementById('szekreny').innerText = szekrenyNev;
 document.getElementById('fakk').innerText = fakkSzam + ".";
+document.getElementById('maszkID').innerText = kulcs;
 
 doboz.style.display = 'block';
 talalat = true;
-break; // Megvan, kilépünk a belső ciklusból
+break;
 }
 }
-if (talalat) break; // Megvan, kilépünk a külső ciklusból
+if (talalat) break;
 }
 
-if (!talalat) doboz.style.display = 'none';
+if (!talalat) {
+// Ha nincs konkrét találat, de gépeltünk valamit, ne tüntessük el durván,
+// de itt most elrejtjük az eredmény dobozt, mert a lista segít.
+doboz.style.display = 'none';
+}
 }
 </script>
 </body>
