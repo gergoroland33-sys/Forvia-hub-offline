@@ -1,1 +1,108 @@
-<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Maszk Finder Pro</title><style>:root{--primary:#3b82f6;--accent:#f59e0b;--bg:#0f172a;--card:#1e293b;--text:#f8fafc;}body{font-family:-apple-system,sans-serif;background-color:var(--bg);color:var(--text);margin:0;padding:15px;display:flex;flex-direction:column;align-items:center;}.container{width:100%;max-width:500px;}.header{text-align:center;margin-bottom:20px;padding:10px 0;}.header h1{font-size:1.6rem;color:var(--primary);margin:0;text-transform:uppercase;letter-spacing:2px;}.search-box{background:var(--card);padding:20px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.3);border:1px solid #334155;position:relative;}input{width:100%;padding:15px;background:#0f172a;border:2px solid #334155;border-radius:12px;color:white;font-size:1.5rem;font-weight:bold;text-align:center;box-sizing:border-box;text-transform:uppercase;}#suggestionList{margin-top:5px;background:var(--card);border-radius:10px;max-height:200px;overflow-y:auto;display:none;border:1px solid #334155;}.suggestion-item{padding:12px;border-bottom:1px solid #334155;cursor:pointer;font-weight:bold;}.suggestion-item:last-child{border-bottom:none;}.suggestion-item:active{background:var(--primary);}.card-result{margin-top:25px;background:linear-gradient(135deg,#1e293b,#0f172a);padding:25px;border-radius:24px;border-left:8px solid var(--accent);display:none;text-align:center;}.label{font-size:0.75rem;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-top:10px;}.value-big{font-size:3.5rem;font-weight:900;color:var(--accent);margin:0;line-height:1;}.value-sub{font-size:1.8rem;font-weight:700;color:white;margin-bottom:10px;}.mask-badge{font-size:1rem;background:rgba(59,130,246,0.2);color:var(--primary);padding:5px 15px;border-radius:10px;display:inline-block;margin-top:15px;}.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:20px;border-top:1px solid #334155;padding-top:20px;}</style></head><body><div class="container"><div class="header"><h1>Maszk Kereső 2026</h1></div><div class="search-box"><input type="text" id="maskSearch" placeholder="PL: M10..." oninput="kereses()" autocomplete="off"><div id="suggestionList"></div></div><div id="resultCard" class="card-result"><div class="label">Szekrény</div><div class="value-big" id="outCabinet">-</div><div class="details-grid"><div><div class="label">Fakk száma</div><div class="value-sub" id="outFakk">-</div></div><div><div class="label">Azonosító</div><div class="mask-badge" id="outMask">-</div></div></div></div></div><script>let maskData=[];let allMasks=[];fetch('Maszk 2026.csv').then(r=>r.text()).then(d=>{maskData=d.split('\n').filter(r=>r.trim()!=='');for(let i=1;i<maskData.length;i++){const c=maskData[i].split(';');c.forEach(ce=>{const cl=ce.trim().toUpperCase();if(cl.startsWith('M'))allMasks.push(cl);});}allMasks=[...new Set(allMasks)];});function kereses(){const q=document.getElementById('maskSearch').value.trim().toUpperCase();const rc=document.getElementById('resultCard');const sl=document.getElementById('suggestionList');sl.innerHTML='';if(q.length<1){rc.style.display='none';sl.style.display='none';return;}const m=allMasks.filter(x=>x.includes(q)).slice(0,5);if(m.length>0){sl.style.display='block';m.forEach(mx=>{const d=document.createElement('div');d.className='suggestion-item';d.innerText=mx;d.onclick=()=>{document.getElementById('maskSearch').value=mx;teljesKereses(mx);};sl.appendChild(d);});}else{sl.style.display='none';}teljesKereses(q);}function teljesKereses(q){const rc=document.getElementById('resultCard');const sl=document.getElementById('suggestionList');const r=maskData;const h=r[0].split(';');let f=false;for(let i=1;i<r.length;i++){const c=r[i].split(';');for(let j=0;j<c.length;j++){if(c[j]&&c[j].trim().toUpperCase()===q){const ci=Math.floor(j/2);const cn=h[ci*2]||(ci+1);const fn=c[j-1]?c[j-1].trim():"?";document.getElementById('outCabinet').innerText=cn;document.getElementById('outFakk').innerText=fn+".";document.getElementById('outMask').innerText=q;rc.style.display='block';sl.style.display='none';f=true;break;}}if(f)break;}if(!f)rc.style.display='none';}<\/script></body></html>
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maszk Finder</title>
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:white;margin:0;padding:20px;text-align:center;}
+input{width:100%;padding:15px;font-size:1.5rem;background:#1e293b;border:2px solid #3b82f6;color:white;border-radius:12px;text-align:center;box-sizing:border-box;text-transform:uppercase;margin-bottom:20px;}
+#eredmeny{display:none;background:#1e293b;padding:25px;border-radius:15px;border-left:8px solid #fbbf24;animation:pop 0.3s ease;}
+h1{color:#3b82f6;margin-bottom:30px;}
+.label{color:#94a3b8;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;}
+.big-val{font-size:3.5rem;font-weight:900;color:#fbbf24;line-height:1;margin:10px 0;}
+.sub-val{font-size:1.5rem;font-weight:bold;}
+@keyframes pop{from{transform:scale(0.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+#status{color:#ef4444;font-size:0.9rem;margin-top:10px;}
+</style>
+</head>
+<body>
+
+<h1>Maszk Kereső</h1>
+
+<input type="text" id="inp" placeholder="PL: M10..." oninput="keres()" autocomplete="off">
+
+<div id="eredmeny">
+<div class="label">SZEKRÉNY</div>
+<div class="big-val" id="szekreny">-</div>
+<div style="margin-top:15px;">
+<div class="label">FAKK SZÁMA</div>
+<div class="sub-val" id="fakk">-</div>
+</div>
+</div>
+
+<div id="status"></div>
+
+<script>
+let adatb = [];
+let fejléc = [];
+
+// Itt olvassuk be a CSV-t. A %20 jelenti a szóközt!
+fetch('Maszk%202026.csv')
+.then(response => {
+if (!response.ok) throw new Error("A CSV fájl nem található!");
+return response.text();
+})
+.then(szoveg => {
+adatb = szoveg.split('\n');
+// Az első sor a fejléc (Szekrény számok)
+fejléc = adatb[0].split(';');
+document.getElementById('status').style.color = '#10b981';
+document.getElementById('status').innerText = "Adatbázis betöltve.";
+})
+.catch(hiba => {
+document.getElementById('status').innerText = "HIBA: A 'Maszk 2026.csv' nem olvasható. Ellenőrizd a mappát!";
+});
+
+function keres() {
+const kulcs = document.getElementById('inp').value.trim().toUpperCase();
+const doboz = document.getElementById('eredmeny');
+
+if (kulcs.length < 2) {
+doboz.style.display = 'none';
+return;
+}
+
+// Végigmegyünk a sorokon (az 1. sortól kezdve)
+let talalat = false;
+for (let i = 1; i < adatb.length; i++) {
+const sor = adatb[i].split(';');
+
+// Végigmegyünk az oszlopokon
+for (let j = 0; j < sor.length; j++) {
+// Ha megvan a Maszk ID
+if (sor[j] && sor[j].trim().toUpperCase() === kulcs) {
+
+// Kiszámoljuk, melyik szekrényhez tartozik
+// A CSV logika: Fakk;Maszk;Fakk;Maszk...
+// Tehát a Maszk indexe (j) mindig páratlan (1, 3, 5...)
+// A hozzá tartozó Szekrény indexe a fejlécben: (j-1)
+// VAGY ha a fejléc másképp van: oszlop pár indexe * 2
+
+const oszlopParIndex = Math.floor(j / 2);
+const fejlecIndex = oszlopParIndex * 2;
+
+// Ha a fejlécben üres a cella, akkor az előzőt vesszük (egyesített cellák miatt)
+let szekrenyNev = fejléc[fejlecIndex];
+if(!szekrenyNev || szekrenyNev.trim() === "") {
+szekrenyNev = (oszlopParIndex + 1) + ". Szekrény"; // Vészmegoldás
+}
+
+const fakkSzam = sor[j-1]; // A fakk száma mindig a maszk előtt van
+
+document.getElementById('szekreny').innerText = szekrenyNev;
+document.getElementById('fakk').innerText = fakkSzam + ".";
+
+doboz.style.display = 'block';
+talalat = true;
+break; // Megvan, kilépünk a belső ciklusból
+}
+}
+if (talalat) break; // Megvan, kilépünk a külső ciklusból
+}
+
+if (!talalat) doboz.style.display = 'none';
+}
+</script>
+</body>
+</html>
