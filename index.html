@@ -2,136 +2,173 @@
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>FORVIA SMT HUB</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>FORVIA HUB - Offline Edition</title>
 <style>
-/* --- STÍLUS (Változatlan, csak a szövegek cserélődtek) --- */
-body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; background: #0f172a; overflow: hidden; }
-.layout { display: flex; height: 100vh; width: 100vw; position: relative; }
-
-.sidebar {
-width: 260px; background: #111827; border-right: 1px solid #374151;
-display: flex; flex-direction: column; flex-shrink: 0;
-position: relative; z-index: 20; transition: transform 0.3s ease;
-}
-.header { padding: 25px 20px; text-align: center; border-bottom: 1px solid #374151; }
-.header h1 { color: #3b82f6; margin: 0; font-size: 1.3rem; font-weight: 800; letter-spacing: 1px; }
-.header small { color: #6b7280; font-size: 0.65rem; display: block; margin-top: 5px; font-weight: bold; letter-spacing: 1px; }
-
-.menu { flex: 1; padding: 15px 10px; overflow-y: auto; }
-
-.btn {
-padding: 14px 15px; margin-bottom: 8px; color: #9ca3af; cursor: pointer;
-border-radius: 10px; font-weight: 500; display: flex; align-items: center;
-transition: all 0.2s; -webkit-tap-highlight-color: transparent;
-}
-.btn:hover { background: #1f2937; color: white; }
-.btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-.btn span { margin-left: 12px; font-size: 0.95rem; }
-
-.footer { padding: 20px; color: #6b7280; text-align: center; font-size: 0.75rem; border-top: 1px solid #374151; }
-
-.main { flex: 1; position: relative; background: #0f172a; width: 100%; -webkit-overflow-scrolling: touch; }
-iframe { width: 100%; height: 100%; border: none; display: none; background: #0f172a; }
-
-#welcome {
-position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-display: flex; flex-direction: column; justify-content: center; align-items: center;
-color: white; padding: 20px; box-sizing: border-box; text-align: center;
-}
-#welcome h2 { font-size: 2.5rem; margin-bottom: 10px; }
-#welcome p { color: #94a3b8; font-size: 1.1rem; }
-
-.mobile-toggle {
-display: none; position: fixed; bottom: 25px; right: 25px;
-width: 55px; height: 55px; background: #3b82f6;
-border-radius: 50%; z-index: 100; justify-content: center;
-align-items: center; color: white; font-size: 1.6rem;
-cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+:root {
+--bg: #0f172a;
+--card: #1e293b;
+--accent: #3b82f6;
+--text: #f8fafc;
+--border: #334155;
 }
 
-@media (max-width: 768px) {
-.sidebar {
-position: fixed; top: 0; left: 0; height: 100%; width: 85%; max-width: 300px;
-transform: translateX(-100%); box-shadow: 5px 0 25px rgba(0,0,0,0.8);
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+background: var(--bg);
+color: var(--text);
+margin: 0;
+/* iPhone 12 fix: dinamikus magasság és biztonsági sáv */
+height: 100dvh;
+display: flex;
+flex-direction: column;
+padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom) 15px;
 }
-.sidebar.open { transform: translateX(0); }
-.mobile-toggle { display: flex; }
-#overlay {
-display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-background: rgba(0,0,0,0.7); z-index: 15; backdrop-filter: blur(3px);
+
+header {
+text-align: center;
+padding: 20px 0;
 }
-#overlay.show { display: block; }
+
+header h1 {
+margin: 0;
+font-size: 1.5rem;
+letter-spacing: 2px;
+color: var(--accent);
+text-transform: uppercase;
 }
+
+header p {
+margin: 5px 0 0;
+font-size: 0.8rem;
+color: #64748b;
+}
+
+/* Rugalmas rácsrendszer, ami alkalmazkodik a képernyőhöz */
+.menu-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+gap: 15px;
+flex-grow: 1;
+overflow-y: auto; /* Ha sok a gomb, görgethető lesz a terület */
+padding: 10px 0;
+}
+
+.module-btn {
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 15px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+text-decoration: none;
+color: var(--text);
+padding: 20px;
+transition: all 0.2s ease;
+box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.module-btn:active {
+transform: scale(0.95);
+background: #2d3a4f;
+border-color: var(--accent);
+}
+
+.module-btn i {
+font-size: 2rem;
+margin-bottom: 10px;
+}
+
+.module-btn span {
+font-weight: 600;
+font-size: 0.9rem;
+text-align: center;
+}
+
+/* Ikonok helyettesítése emoji-kkal vagy egyszerű karakterekkel */
+.icon { font-style: normal; font-size: 2.5rem; margin-bottom: 8px; }
+
+footer {
+text-align: center;
+padding: 15px 0;
+font-size: 0.7rem;
+color: #475569;
+font-weight: bold;
+letter-spacing: 1px;
+}
+
+/* Gomb specifikus színek */
+.btn-secure { border: 1px solid rgba(59, 130, 246, 0.5); }
 </style>
 </head>
 <body>
 
-<div id="overlay" onclick="closeMenu()"></div>
-
-<div class="layout">
-<div class="sidebar" id="sidebar">
-<div class="header">
+<header>
 <h1>FORVIA HUB</h1>
-<small>OFFLINE/ONLINE MODE</small>
-</div>
-<div class="menu">
-<div class="btn active" onclick="goHome(this)">🏠<span>Kezdőlap</span></div>
-<div class="btn" onclick="openFile('1.html', this)">🔍<span>Cikkszám Kereső</span></div>
-<div class="btn" onclick="openFile('2.html', this)">💰<span>Bérkalkulátor</span></div>
-<div class="btn" onclick="openFile('3.html', this)">📅<span>Műszaknaptár</span></div>
-<div class="btn" onclick="openFile('4.html', this)">📝<span>Napi Jelentés</span></div>
-<div class="btn" onclick="openFile('5.html', this)">🎭<span>Maszk Finder</span></div>
-<div class="btn" onclick="openFile('7.html', this)">📈<span>Quality Analízis</span></div>
-</div>
-<div class="footer">
-Szoftverfejlesztő:<br><b style="color:white">Gergő Roland</b><br>2026
-</div>
+<p>Industrial Management Tools</p>
+</header>
+
+<div class="menu-grid">
+<a href="1.html" class="module-btn">
+<i class="icon">🔍</i>
+<span>Cikkszám Kereső</span>
+</a>
+
+<a href="2.html" class="module-btn">
+<i class="icon">🧮</i>
+<span>Bérkalkulátor</span>
+</a>
+
+<a href="3.html" class="module-btn">
+<i class="icon">📅</i>
+<span>Műszaknaptár</span>
+</a>
+
+<a href="4.html" class="module-btn">
+<i class="icon">📝</i>
+<span>Napi Jelentés</span>
+</a>
+
+<a href="5.html" class="module-btn">
+<i class="icon">🎭</i>
+<span>Maszk Finder</span>
+</a>
+
+<div onclick="openSecureLink()" class="module-btn btn-secure" style="cursor: pointer;">
+<i class="icon">⚙️</i>
+<span>Adatgeneráló</span>
 </div>
 
-<div class="main">
-<div id="welcome">
-<h2>Üdv <span style="color:#3b82f6">Felhasználó!</span></h2>
-<p>Válassz egy modult a menüből.</p>
-</div>
-<iframe id="appFrame"></iframe>
-</div>
+<a href="7.html" class="module-btn">
+<i class="icon">📊</i>
+<span>Quality Analízis</span>
+</a>
 </div>
 
-<div class="mobile-toggle" onclick="toggleMenu()">☰</div>
+<footer>GERGŐ ROLAND | 2026</footer>
 
 <script>
-function goHome(el) {
-document.getElementById('appFrame').style.display = 'none';
-document.getElementById('welcome').style.display = 'flex';
-document.getElementById('appFrame').src = "";
-setActive(el);
-closeMenu();
+function openSecureLink() {
+// Felugró ablak jelszó kéréshez
+let pin = prompt("A modul megnyitásához add meg a kódot:");
+
+if (pin === "123456") {
+// Ha a kód jó, megnyitja az új ablakban
+window.open("https://gergoroland33-sys.github.io/adatgeneralo/", "_blank");
+} else if (pin !== null) {
+// Ha rossz a kód (és nem a Mégse gombra nyomott)
+alert("Helytelen kód! Hozzáférés megtagadva.");
+}
 }
 
-function openFile(fileName, el) {
-document.getElementById('welcome').style.display = 'none';
-const iframe = document.getElementById('appFrame');
-iframe.src = fileName + "?v=" + Math.random();
-iframe.style.display = 'block';
-setActive(el);
-closeMenu();
-}
-
-function setActive(el) {
-document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-el.classList.add('active');
-}
-
-function toggleMenu() {
-document.getElementById('sidebar').classList.toggle('open');
-document.getElementById('overlay').classList.toggle('show');
-}
-
-function closeMenu() {
-document.getElementById('sidebar').classList.remove('open');
-document.getElementById('overlay').classList.remove('show');
-}
+// iPhone 12 Safari fix: Megakadályozza az ugrálást görgetéskor
+document.addEventListener('touchmove', function (e) {
+if (e.scale !== 1) { e.preventDefault(); }
+}, { passive: false });
 </script>
+
 </body>
 </html>
