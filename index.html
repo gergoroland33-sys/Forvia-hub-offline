@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>FORVIA HUB - MASTER</title>
+<title>FORVIA HUB - MASTER SHELL</title>
 <style>
 :root {
 --bg: #0b1120; --card: #1e293b; --accent: #3b82f6;
@@ -19,27 +19,29 @@ margin: 0; height: 100dvh; overflow: hidden;
 display: flex; flex-direction: column;
 }
 
-/* --- PRO ÜDVÖZLŐ KÉPERNYŐ --- */
-.main-display {
+/* --- TARTALOM ABLAK (IFRAME) --- */
+#content-frame {
+border: none; width: 100%; height: 100%;
+display: none; /* Alapból rejtve, amíg nem választasz modult */
+background: #0f172a;
+}
+
+/* --- ÜDVÖZLŐ KÉPERNYŐ (HOME) --- */
+#home-screen {
 flex-grow: 1; display: flex; flex-direction: column;
 align-items: center; justify-content: center; text-align: center;
-background:
-radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 40%),
-radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 40%),
-#0b1120;
-padding: 20px;
+background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 40%),
+radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 40%), #0b1120;
+padding: 20px; position: relative; width: 100%; height: 100%;
 }
 
 .glass-card {
 background: rgba(255, 255, 255, 0.03);
-backdrop-filter: blur(12px);
--webkit-backdrop-filter: blur(12px);
+backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
 border: 1px solid rgba(255, 255, 255, 0.1);
-padding: 40px 30px;
-border-radius: 24px;
+padding: 40px 30px; border-radius: 24px;
 box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-max-width: 400px; width: 100%;
-animation: fadeIn 0.8s ease-out;
+max-width: 400px; width: 100%; animation: fadeIn 0.8s ease-out;
 }
 
 .brand-title {
@@ -59,22 +61,24 @@ border: 1px solid rgba(16, 185, 129, 0.2); margin: 20px 0;
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- SIDEBAR (Oldalsáv - Alapból rejtve mindenhol) --- */
+/* --- SIDEBAR (OLDALSÁV) --- */
 .sidebar {
 position: fixed; left: 0; top: 0;
 width: 280px; height: 100%; background: #111827;
 border-right: 1px solid var(--border);
 display: flex; flex-direction: column;
-transform: translateX(-100%); /* Mindig elrejtve, amíg a gombot meg nem nyomod */
+transform: translateX(-100%);
 transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-z-index: 2000; padding: 20px 0;
+z-index: 2000;
 }
 .sidebar.open { transform: translateX(0); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
 
-.sidebar-header { padding: 0 20px 20px 20px; border-bottom: 1px solid var(--border); }
+.sidebar-header { padding: 25px 20px; border-bottom: 1px solid var(--border); }
 .sidebar-header h2 { font-size: 1.4rem; margin: 0; color: var(--accent); }
 
 .nav-list { padding: 20px; flex-grow: 1; overflow-y: auto; }
+
+/* Gombok stílusa */
 .nav-item {
 display: flex; align-items: center; padding: 14px 15px;
 margin-bottom: 8px; border-radius: 12px; text-decoration: none;
@@ -83,21 +87,13 @@ color: var(--text-dim); font-weight: 500; transition: 0.2s; cursor: pointer;
 .nav-item i { width: 30px; font-style: normal; text-align: center; font-size: 1.2rem; }
 .nav-item:hover, .nav-item.active { background: var(--accent); color: white; }
 
-/* --- MENÜ GOMB (FIX, KEREK, MINDIG LÁTHATÓ) --- */
+/* --- MENÜ GOMB (FIX, MINDIG LÁTHATÓ) --- */
 .menu-fab {
-position: fixed;
-bottom: 30px;
-right: 30px;
-width: 60px;
-height: 60px;
-background: var(--accent);
-border-radius: 50%; /* KEREK */
-display: flex !important; /* KÉNYSZERÍTETT MEGJELENÉS */
-align-items: center;
-justify-content: center;
+position: fixed; bottom: 30px; right: 30px;
+width: 60px; height: 60px; background: var(--accent);
+border-radius: 50%; display: flex; align-items: center; justify-content: center;
 box-shadow: 0 10px 30px rgba(59, 130, 246, 0.6);
-cursor: pointer;
-z-index: 999999; /* LEGJOBBAN FELÜL */
+cursor: pointer; z-index: 2147483647; /* Legfelső réteg */
 border: 2px solid rgba(255,255,255,0.1);
 transition: transform 0.2s;
 }
@@ -110,53 +106,42 @@ background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 1500;
 }
 .overlay.active { display: block; }
 
-footer { padding: 20px; border-top: 1px solid var(--border); text-align: center; font-size: 0.75rem; color: var(--text-dim); }
+footer { padding: 20px; border-top: 1px solid var(--border); text-align: center; color: #64748b; font-size: 0.75rem; }
 </style>
 </head>
 <body>
 
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-<main class="main-display">
+<div id="home-screen">
 <div class="glass-card">
 <h1 class="brand-title">FORVIA HUB</h1>
 <span style="color:var(--accent); font-weight:bold; letter-spacing:2px; font-size:0.9rem;">OFFLINE SYSTEM</span>
-
-<div class="status-badge">
-<div class="status-dot"></div>
-ONLINE
+<div class="status-badge"><div class="status-dot"></div>ONLINE</div>
+<p style="color: #94a3b8; margin-top: 20px;">Válassz modult a jobb alsó sarokban található<br><strong style="color:white">Menü Gomb</strong> segítségével.</p>
+</div>
 </div>
 
-<p style="color: #94a3b8; margin-top: 20px;">
-Válassz modult a jobb alsó sarokban található<br>
-<strong style="color:white">Menü Gomb</strong> segítségével.
-</p>
-</div>
-</main>
+<iframe id="content-frame" name="appFrame"></iframe>
 
 <aside class="sidebar" id="sidebar">
-<div class="sidebar-header">
-<h2>FORVIA HUB</h2>
-</div>
+<div class="sidebar-header"><h2>FORVIA HUB</h2></div>
 
 <nav class="nav-list">
-<a href="index.html" class="nav-item active"><i>🏠</i> Kezdőlap</a>
-<a href="1.html" class="nav-item"><i>🔍</i> Cikkszám Kereső</a>
-<a href="2.html" class="nav-item"><i>💰</i> Bérkalkulátor</a>
-<a href="3.html" class="nav-item"><i>📅</i> Műszaknaptár</a>
-<a href="4.html" class="nav-item"><i>📝</i> Napi Jelentés</a>
-<a href="5.html" class="nav-item"><i>🎭</i> Maszk Finder</a>
+<div onclick="showHome()" class="nav-item active"><i>🏠</i> Kezdőlap</div>
+
+<div onclick="loadModule('1.html')" class="nav-item"><i>🔍</i> Cikkszám Kereső</div>
+<div onclick="loadModule('2.html')" class="nav-item"><i>💰</i> Bérkalkulátor</div>
+<div onclick="loadModule('3.html')" class="nav-item"><i>📅</i> Műszaknaptár</div>
+<div onclick="loadModule('4.html')" class="nav-item"><i>📝</i> Napi Jelentés</div>
+<div onclick="loadModule('5.html')" class="nav-item"><i>🎭</i> Maszk Finder</div>
 
 <div onclick="openSecureLink()" class="nav-item"><i>⚙️</i> Adatgeneráló</div>
 
-<a href="7.html" class="nav-item"><i>📈</i> Quality Analízis</a>
+<div onclick="loadModule('7.html')" class="nav-item"><i>📈</i> Quality Analízis</div>
 </nav>
 
-<footer>
-Szoftverfejlesztő:<br>
-<strong style="color:white">GERGŐ ROLAND</strong><br>
-2026
-</footer>
+<footer>Szoftverfejlesztő:<br><strong style="color:white">GERGŐ ROLAND</strong><br>2026</footer>
 </aside>
 
 <div class="menu-fab" id="menuFab" onclick="toggleMenu()">
@@ -164,18 +149,41 @@ Szoftverfejlesztő:<br>
 </div>
 
 <script>
+// Menü Nyitás/Zárás
 function toggleMenu() {
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
 const icon = document.getElementById('menuIcon');
-
 sidebar.classList.toggle('open');
 overlay.classList.toggle('active');
-
-// Ikon csere X-re ha nyitva van
 icon.innerText = sidebar.classList.contains('open') ? '✕' : '☰';
 }
 
+// Modul betöltése az ablakba
+function loadModule(url) {
+const home = document.getElementById('home-screen');
+const frame = document.getElementById('content-frame');
+
+// UI Váltás
+home.style.display = 'none';
+frame.style.display = 'block';
+
+// Fájl betöltése
+frame.src = url;
+
+// Menü bezárása kattintás után
+toggleMenu();
+}
+
+// Vissza a kezdőlapra
+function showHome() {
+document.getElementById('home-screen').style.display = 'flex';
+document.getElementById('content-frame').style.display = 'none';
+document.getElementById('content-frame').src = ""; // Kiürítjük
+toggleMenu();
+}
+
+// Jelszavas link
 function openSecureLink() {
 let pin = prompt("Kérem a biztonsági kódot:");
 if (pin === "123456") {
@@ -185,9 +193,7 @@ alert("Hibás kód!");
 }
 }
 
-// Tiltja a véletlen nagyítást iOS-en
 document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
 </script>
-
 </body>
 </html>
