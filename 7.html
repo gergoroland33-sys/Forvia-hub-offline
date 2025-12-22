@@ -50,7 +50,7 @@ td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
 @media (max-width: 600px) { .top-highlights { grid-template-columns: 1fr; } }
 @media print {
-.upload-zone, button, .filter-grid, .global-fab, .global-sidebar { display: none !important; }
+.upload-zone, button, .filter-grid { display: none !important; }
 body { background: white; color: black; padding: 0; }
 .analysis-card, .stat-card { border: 1px solid #ccc; background: white !important; color: black !important; box-shadow: none; }
 .stat-value, h1, span { color: black !important; }
@@ -156,17 +156,16 @@ alert("A fájl üres vagy hibás!");
 return;
 }
 
-// CSV elválasztó detektálás (vessző vagy pontosvessző)
+// Automatikus CSV elválasztó felismerés (; vagy ,)
 let separator = ';';
 if (lines[0].indexOf(';') === -1 && lines[0].indexOf(',') > -1) {
 separator = ',';
 }
 
 // Adatfeldolgozás
-// Feltételezett oszlopok: 0:Gépsor, 1:Gép, 2:Cikkszám, 3:Beültetés, 4:Felvételi, 5:Kamera
 allData = lines.slice(1).map(line => {
 const c = line.split(separator);
-if (c.length < 3) return null; // Hibás sor kihagyása
+if (c.length < 3) return null;
 return {
 gA: c[0] ? c[0].trim() : "Egyéb", // Gépsor
 g: c[1] ? c[1].trim() : "Egyéb", // Gép
@@ -175,7 +174,7 @@ b: parseInt(c[3]) || 0, // Beültetés
 f: parseInt(c[4]) || 0, // Felvételi Hiba
 k: parseInt(c[5]) || 0 // Kamera Hiba
 };
-}).filter(item => item !== null); // Üres sorok szűrése
+}).filter(item => item !== null);
 
 populateFilters();
 updateView();
@@ -218,7 +217,6 @@ stats.beult += d.b;
 stats.felv += d.f;
 stats.kam += d.k;
 
-// Hibák gyűjtése cikkszámonként
 if (d.f > 0) stats.dF[d.cikk] = (stats.dF[d.cikk] || 0) + d.f;
 if (d.k > 0) stats.dK[d.cikk] = (stats.dK[d.cikk] || 0) + d.k;
 
@@ -241,7 +239,7 @@ tbody.innerHTML = "";
 
 const sorted = Object.entries(dataDict).sort((a, b) => b[1] - a[1]);
 
-// Legrosszabb kiírása a kártyára
+// Legrosszabb kiírása
 if (sorted.length > 0) {
 document.getElementById(worstId).innerText = `${sorted[0][0]} (${sorted[0][1]} db)`;
 } else {
@@ -265,79 +263,6 @@ tbody.innerHTML += row;
 if (sorted.length === 0) {
 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Nincs megjeleníthető adat</td></tr>';
 }
-}
-</script>
-
-<style>
-.global-sidebar {
-position: fixed; left: 0; top: 0;
-width: 280px; height: 100%; background: #161e2e;
-border-right: 1px solid #1f2937;
-display: flex; flex-direction: column;
-transform: translateX(-100%);
-transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-z-index: 2000; padding: 20px;
-}
-.global-sidebar.open { transform: translateX(0); box-shadow: 20px 0 50px rgba(0,0,0,0.7); }
-
-.global-overlay {
-display: none; position: fixed; inset: 0;
-background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1500;
-}
-.global-overlay.active { display: block; }
-
-.global-fab {
-position: fixed; bottom: 35px; right: 30px;
-width: 65px; height: 65px; background: #3b82f6;
-border-radius: 20px; display: flex; align-items: center; justify-content: center;
-box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); cursor: pointer; z-index: 3000;
-}
-
-.nav-link {
-display: flex; align-items: center; padding: 12px; margin-bottom: 5px;
-color: #94a3b8; text-decoration: none; font-weight: 500; border-radius: 10px;
-}
-.nav-link:hover { background: #3b82f6; color: white; }
-.nav-link i { width: 25px; margin-right: 10px; font-style: normal; }
-</style>
-
-<div class="global-overlay" id="gOverlay" onclick="toggleGlobalMenu()"></div>
-
-<aside class="global-sidebar" id="gSidebar">
-<h2 style="color:#3b82f6; margin:10px 0 30px 10px; font-size:1.4rem;">FORVIA HUB</h2>
-<nav style="flex:1; overflow-y:auto;">
-<a href="index.html" class="nav-link"><i>🏠</i> Kezdőlap</a>
-<a href="1.html" class="nav-link"><i>🔍</i> Cikkszám Kereső</a>
-<a href="2.html" class="nav-link"><i>💰</i> Bérkalkulátor</a>
-<a href="3.html" class="nav-link"><i>📅</i> Műszaknaptár</a>
-<a href="4.html" class="nav-link"><i>📝</i> Napi Jelentés</a>
-<a href="5.html" class="nav-link"><i>🎭</i> Maszk Finder</a>
-<div onclick="openSecureLink()" class="nav-link" style="cursor:pointer;"><i>⚙️</i> Adatgeneráló</div>
-<a href="7.html" class="nav-link" style="background:#3b82f6; color:white;"><i>📈</i> Quality Analízis</a>
-</nav>
-<div style="text-align:center; font-size:0.7rem; color:#64748b; margin-top:20px;">
-GERGŐ ROLAND | 2026
-</div>
-</aside>
-
-<div class="global-fab" onclick="toggleGlobalMenu()">
-<span id="gMenuIcon" style="font-size:30px; color:white;">☰</span>
-</div>
-
-<script>
-function toggleGlobalMenu() {
-const s = document.getElementById('gSidebar');
-const o = document.getElementById('gOverlay');
-const i = document.getElementById('gMenuIcon');
-
-s.classList.toggle('open');
-o.classList.toggle('active');
-i.innerText = s.classList.contains('open') ? '✕' : '☰';
-}
-
-function openSecureLink() {
-let pin = prompt("Kód:");
-if (pin === "123456") window.open("https://gergoroland33-sys.github.io/adatgeneralo/", "_blank");
 }
 </script>
 
