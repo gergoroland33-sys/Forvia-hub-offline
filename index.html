@@ -3,50 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>FORVIA HUB - OFFLINE</title>
+<title>FORVIA HUB PRO</title>
 <style>
-:root { --bg: #0b1120; --card: #161e2e; --accent: #3b82f6; --text: #f3f4f6; }
-body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100dvh; }
-
-/* Sidebar stílus */
-.sidebar {
-width: 280px; height: 100%; background: var(--card);
-display: flex; flex-direction: column; padding: 30px 20px;
-border-right: 1px solid #1f2937; transition: 0.3s;
-position: fixed; left: -280px; z-index: 1000;
+:root {
+--bg: #0b1120; --card: #161e2e; --accent: #3b82f6;
+--text: #f3f4f6; --text-dim: #94a3b8; --border: #1f2937;
+--sidebar-width: 280px;
 }
-.sidebar.active { left: 0; }
 
-header { margin-bottom: 40px; padding-left: 10px; }
-header h1 { font-size: 1.6rem; margin: 0; color: var(--accent); letter-spacing: 2px; }
-header p { font-size: 0.7rem; color: #64748b; margin-top: 5px; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-.nav-list { list-style: none; padding: 0; margin: 0; flex: 1; }
+body {
+font-family: 'Inter', system-ui, sans-serif;
+background: var(--bg); color: var(--text);
+margin: 0; display: flex; height: 100dvh; overflow: hidden;
+}
+
+/* --- SIDEBAR (Laptopon fix, Mobilon elrejtve) --- */
+.sidebar {
+width: var(--sidebar-width); height: 100%; background: var(--card);
+border-right: 1px solid var(--border); display: flex; flex-direction: column;
+transition: transform 0.3s ease; z-index: 1000;
+}
+
+header { padding: 30px 25px; border-bottom: 1px solid var(--border); }
+header h1 { font-size: 1.4rem; margin: 0; color: var(--accent); letter-spacing: 2px; font-weight: 800; }
+header p { font-size: 0.65rem; color: var(--text-dim); margin: 5px 0 0; text-transform: uppercase; }
+
+.nav-list { padding: 20px 15px; flex-grow: 1; overflow-y: auto; }
 .nav-item {
 display: flex; align-items: center; padding: 12px 15px;
-margin-bottom: 10px; border-radius: 10px; text-decoration: none;
-color: #94a3b8; font-weight: 500; transition: 0.2s;
+margin-bottom: 8px; border-radius: 10px; text-decoration: none;
+color: var(--text-dim); font-weight: 500; transition: 0.2s;
+border: 1px solid transparent;
 }
-.nav-item i { font-size: 1.2rem; margin-right: 15px; }
-.nav-item.active { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
-.nav-item:hover:not(.active) { background: #1f2937; color: white; }
+.nav-item i { font-size: 1.2rem; margin-right: 12px; font-style: normal; }
+.nav-item.active { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+.nav-item:hover:not(.active) { background: #1f2937; color: white; border-color: var(--border); }
 
-/* Lebegő Menü Gomb */
+footer { padding: 20px; border-top: 1px solid var(--border); text-align: center; }
+.creator-info { font-size: 0.7rem; color: var(--text-dim); line-height: 1.4; }
+.creator-info b { color: white; text-transform: uppercase; letter-spacing: 1px; }
+
+/* --- TARTALMI RÉSZ --- */
+.main-content { flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #111827 0%, #0b1120 100%); }
+.welcome-msg { text-align: center; opacity: 0.5; }
+
+/* --- MOBIL LOGIKA --- */
+@media (max-width: 992px) {
+.sidebar { position: fixed; left: 0; transform: translateX(-100%); }
+.sidebar.open { transform: translateX(0); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
+.main-content { width: 100%; }
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 900; }
+.overlay.active { display: block; }
+}
+
+/* Lebegő Menü Gomb (Csak mobilon látszik) */
 .menu-fab {
 position: fixed; bottom: 30px; right: 30px;
-width: 60px; height: 60px; background: var(--accent);
-border-radius: 50%; display: flex; align-items: center; justify-content: center;
-box-shadow: 0 4px 20px rgba(0,0,0,0.4); cursor: pointer; z-index: 1100;
+width: 56px; height: 56px; background: var(--accent);
+border-radius: 18px; display: none; align-items: center; justify-content: center;
+box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4); cursor: pointer; z-index: 1100;
 }
-.menu-fab span { font-size: 2rem; color: white; }
 
-.overlay {
-position: fixed; top:0; left:0; width:100%; height:100%;
-background: rgba(0,0,0,0.5); display:none; z-index: 900;
-}
-.overlay.active { display:block; }
+@media (max-width: 992px) { .menu-fab { display: flex; } }
 
-footer { font-size: 0.7rem; text-align: center; color: #4b5563; border-top: 1px solid #1f2937; padding-top: 20px; }
+/* Ikon Stílusok */
+.nav-item i { width: 24px; text-align: center; }
 </style>
 </head>
 <body>
@@ -56,10 +79,10 @@ footer { font-size: 0.7rem; text-align: center; color: #4b5563; border-top: 1px 
 <div class="sidebar" id="sidebar">
 <header>
 <h1>FORVIA HUB</h1>
-<p>OFFLINE/ONLINE MODE</p>
+<p>Industrial Offline System</p>
 </header>
 
-<div class="nav-list">
+<nav class="nav-list">
 <a href="index.html" class="nav-item active"><i>🏠</i> Kezdőlap</a>
 <a href="1.html" class="nav-item"><i>🔍</i> Cikkszám Kereső</a>
 <a href="2.html" class="nav-item"><i>💰</i> Bérkalkulátor</a>
@@ -68,25 +91,37 @@ footer { font-size: 0.7rem; text-align: center; color: #4b5563; border-top: 1px 
 <a href="5.html" class="nav-item"><i>🎭</i> Maszk Finder</a>
 <div onclick="openSecureLink()" class="nav-item" style="cursor:pointer;"><i>⚙️</i> Adatgeneráló</div>
 <a href="7.html" class="nav-item"><i>📈</i> Quality Analízis</a>
-</div>
+</nav>
 
 <footer>
+<div class="creator-info">
 Szoftverfejlesztő:<br>
-<strong>Gergő Roland</strong><br>
+<b>Gergő Roland</b><br>
 2026
+</div>
 </footer>
 </div>
 
+<main class="main-content">
+<div class="welcome-msg">
+<h2 style="margin-bottom: 0;">Üdvözöllek!</h2>
+<p>Válassz egy modult a menüből.</p>
+</div>
+</main>
+
 <div class="menu-fab" onclick="toggleMenu()">
-<span id="menuIcon">☰</span>
+<span id="menuIcon" style="font-size: 24px; color: white;">☰</span>
 </div>
 
 <script>
 function toggleMenu() {
-document.getElementById('sidebar').classList.toggle('active');
-document.getElementById('overlay').classList.toggle('active');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
 const icon = document.getElementById('menuIcon');
-icon.innerText = icon.innerText === '☰' ? '✕' : '☰';
+
+sidebar.classList.toggle('open');
+overlay.classList.toggle('active');
+icon.innerText = sidebar.classList.contains('open') ? '✕' : '☰';
 }
 
 function openSecureLink() {
