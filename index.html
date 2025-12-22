@@ -20,11 +20,10 @@ margin: 0; height: 100dvh; overflow: hidden;
 display: flex; flex-direction: column;
 }
 
-/* --- ÚJ PRO ÜDVÖZLŐ KÉPERNYŐ --- */
+/* --- PRO ÜDVÖZLŐ KÉPERNYŐ (VÁLTOZATLAN) --- */
 .main-display {
 flex-grow: 1; display: flex; flex-direction: column;
 align-items: center; justify-content: center; text-align: center;
-/* Modern, színesebb háttér */
 background:
 radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 40%),
 radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 40%),
@@ -33,7 +32,6 @@ padding: 20px;
 position: relative;
 }
 
-/* Üveghatású kártya */
 .glass-card {
 background: rgba(255, 255, 255, 0.03);
 backdrop-filter: blur(12px);
@@ -73,7 +71,7 @@ border: 1px solid rgba(16, 185, 129, 0.2);
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- SIDEBAR (Oldalsáv - Változatlan működés) --- */
+/* --- SIDEBAR (VÁLTOZATLAN) --- */
 .sidebar {
 position: fixed; left: 0; top: 0;
 width: 280px; height: 100%; background: #111827;
@@ -97,16 +95,21 @@ color: var(--text-dim); font-weight: 500; transition: 0.2s; cursor: pointer;
 .nav-item i { font-size: 1.2rem; margin-right: 15px; font-style: normal; text-align: center; width: 25px; }
 .nav-item:hover, .nav-item.active { background: var(--accent); color: white; }
 
-/* --- MENÜ GOMB (VISSZAÁLLÍTVA) --- */
+/* --- MENÜ GOMB (JAVÍTVA - MINDIG LÁTHATÓ) --- */
 .menu-fab {
-display: flex; /* Biztosítja, hogy látható legyen */
-position: fixed; bottom: 35px; right: 30px;
-width: 65px; height: 65px; background: var(--accent);
-border-radius: 20px; align-items: center; justify-content: center;
-box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5); cursor: pointer;
-z-index: 9999; /* Legmagasabb prioritás */
-transition: transform 0.2s;
+display: flex !important; /* Kényszerített megjelenítés */
+position: fixed;
+bottom: 35px;
+right: 30px;
+width: 65px; height: 65px;
+background: var(--accent);
+border-radius: 20px;
+align-items: center; justify-content: center;
+box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+cursor: pointer;
+z-index: 2147483647; /* Maximális prioritás */
 border: 1px solid rgba(255,255,255,0.1);
+transition: transform 0.2s;
 }
 .menu-fab:active { transform: scale(0.95); }
 
@@ -196,7 +199,6 @@ alert("Hibás kód! Hozzáférés megtagadva.");
 }
 }
 
-// iPhone 12 iOS 18 fix
 document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
 </script>
 </body>
