@@ -15,9 +15,7 @@
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
     --danger: #ef4444;
-    --danger-dim: rgba(239, 68, 68, 0.1);
     --warning: #f59e0b;
-    --warning-dim: rgba(245, 158, 11, 0.1);
     --border: #334155;
 }
 
@@ -30,7 +28,7 @@ body {
     margin: 0; padding: 20px;
 }
 
-.container { max-width: 1100px; margin: 0 auto; }
+.container { max-width: 1200px; margin: 0 auto; }
 
 /* --- HEADER --- */
 header {
@@ -83,7 +81,7 @@ select {
 
 .stat-title { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; font-weight: bold; }
 .stat-value { font-size: 2rem; font-weight: 800; margin: 5px 0; display: block; }
-.stat-sub { font-size: 0.85rem; opacity: 0.8; font-weight: 600; }
+.stat-sub { font-size: 0.85rem; opacity: 0.9; font-weight: 600; color: var(--text-main); }
 
 /* --- ANALYSIS TABLES --- */
 .analysis-section {
@@ -92,6 +90,7 @@ select {
 .panel {
     background: var(--bg-card); border-radius: 12px;
     border: 1px solid var(--border); overflow: hidden;
+    display: flex; flex-direction: column;
 }
 .panel-header {
     padding: 15px; background: rgba(0,0,0,0.2);
@@ -102,8 +101,7 @@ select {
 
 table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 th { text-align: left; padding: 10px 15px; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
-td { padding: 8px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; position: relative; }
-
+td { padding: 8px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
 
 /* Visual Bar inside table */
 .bar-container {
@@ -120,32 +118,65 @@ td { padding: 8px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); vertica
 .rank-idx { font-weight: bold; color: var(--text-muted); width: 20px; }
 .part-num { font-weight: 700; color: var(--text-main); font-size: 0.95rem; }
 
-/* --- PRINT SETTINGS (A4 Optimized) --- */
+/* --- ⚡ NYOMTATÁS OPTIMALIZÁLÁS (A4 EGY OLDAL) ⚡ --- */
 @media print {
-    @page { size: A4 portrait; margin: 10mm; }
-    body { background: white; color: black; padding: 0; margin: 0; -webkit-print-color-adjust: exact; }
-    .container { max-width: 100%; width: 100%; }
-    
-    /* Rejtsük el a vezérlőket */
-    .upload-zone, .filter-bar, button { display: none !important; }
-    
-    /* Színek visszaállítása nyomtatáshoz */
-    .stat-card, .panel {
-        background: white !important; color: black !important;
-        border: 1px solid #ccc !important; box-shadow: none !important;
+    @page { 
+        size: A4 portrait; 
+        margin: 5mm; /* Nagyon vékony margó, hogy kiférjen */
     }
-    .panel-header { background: #f0f0f0 !important; color: black !important; border-bottom: 2px solid #000; }
-    th { color: #000 !important; border-bottom: 1px solid #000; }
-    td { border-bottom: 1px solid #eee; }
-    .bar-container { background: #eee !important; }
-    .bar-fill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     
-    /* Typography tweaking for single page */
-    .stat-value { font-size: 1.5rem; }
-    h1 { font-size: 1.2rem; }
-    .analysis-section { gap: 10px; margin-top: 10px; }
-    td, th { padding: 4px 8px; font-size: 0.75rem; }
-    .part-num { font-size: 0.8rem; }
+    body { 
+        background: white; color: black; padding: 0; margin: 0; 
+        zoom: 75%; /* Kicsinyítés, hogy biztosan ráférjen */
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact;
+    }
+    
+    .container { max-width: 100%; width: 100%; margin: 0; padding: 0; }
+    
+    /* Amit nem nyomtatunk */
+    .upload-zone, .filter-bar, button, .meta-info button { display: none !important; }
+    
+    /* Header kompakt */
+    header { padding-bottom: 10px; margin-bottom: 10px; border-bottom: 2px solid #000; }
+    
+    /* Stat kártyák */
+    .stats-grid { 
+        gap: 10px; margin-bottom: 15px; 
+        grid-template-columns: repeat(3, 1fr); 
+    }
+    .stat-card {
+        background: white !important; color: black !important;
+        border: 1px solid #000 !important; box-shadow: none !important;
+        padding: 10px;
+    }
+    .stat-value { font-size: 1.6rem; color: black !important; }
+    .stat-sub { color: #333 !important; }
+    
+    /* Elemzések egymás mellett */
+    .analysis-section {
+        display: grid; 
+        grid-template-columns: 1fr 1fr; /* Két oszlop kényszerítése */
+        gap: 10px;
+    }
+    
+    .panel {
+        background: white !important; color: black !important;
+        border: 1px solid #000 !important;
+        break-inside: avoid; /* Ne vágja el a táblázatot */
+    }
+    .panel-header { 
+        background: #eee !important; color: black !important; 
+        border-bottom: 1px solid #000; padding: 8px;
+    }
+    
+    table { font-size: 10pt; }
+    th { color: black !important; border-bottom: 1px solid #000; padding: 5px; }
+    td { border-bottom: 1px solid #ccc; padding: 4px 5px; color: black !important; }
+    
+    .part-num { color: black !important; }
+    .badge { border: 1px solid #000; color: black; background: white; }
+    .bar-container { background: #ddd !important; }
 }
 
 @media (max-width: 768px) {
@@ -163,7 +194,7 @@ td { padding: 8px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); vertica
         </div>
         <div class="meta-info">
             <div id="fileDisplay">Várakozás fájlra...</div>
-            <button onclick="window.print()" style="margin-top:5px; padding:6px 12px; background:var(--primary); color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">NYOMTATÁS (A4)</button>
+            <button onclick="window.print()" style="margin-top:5px; padding:6px 12px; background:var(--primary); color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">NYOMTATÁS (PDF)</button>
         </div>
     </header>
 
@@ -194,19 +225,19 @@ td { padding: 8px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); vertica
 
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-title">Összes Beültetés</div>
+            <div class="stat-title">Termelési volumen</div>
             <span class="stat-value" id="totalBeult" style="color:var(--primary)">0</span>
-            <div class="stat-sub" style="color:var(--text-muted)">Darab termelés</div>
+            <div class="stat-sub">Összes Alkatrész beültetés</div>
         </div>
         <div class="stat-card danger">
             <div class="stat-title">Összes Felvételi Hiba</div>
             <span class="stat-value" id="totalFelv" style="color:var(--danger)">0</span>
-            <div class="stat-sub" id="rateFelv" style="color:var(--danger)">0.00% hibaarány</div>
+            <div class="stat-sub" id="rateFelv" style="color:var(--danger)">0.00% arány (PPM)</div>
         </div>
         <div class="stat-card warning">
             <div class="stat-title">Összes Kamera Hiba</div>
             <span class="stat-value" id="totalKam" style="color:var(--warning)">0</span>
-            <div class="stat-sub" id="rateKam" style="color:var(--warning)">0.00% hibaarány</div>
+            <div class="stat-sub" id="rateKam" style="color:var(--warning)">0.00% arány (PPM)</div>
         </div>
     </div>
 
@@ -220,7 +251,7 @@ td { padding: 8px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); vertica
                 <thead>
                     <tr>
                         <th style="width:30px">#</th>
-                        <th>Cikkszám / Adatok</th>
+                        <th>Cikkszám / Gépadat</th>
                         <th style="text-align:right">Hiba db</th>
                     </tr>
                 </thead>
@@ -237,7 +268,7 @@ td { padding: 8px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); vertica
                 <thead>
                     <tr>
                         <th style="width:30px">#</th>
-                        <th>Cikkszám / Adatok</th>
+                        <th>Cikkszám / Gépadat</th>
                         <th style="text-align:right">Hiba db</th>
                     </tr>
                 </thead>
@@ -248,7 +279,7 @@ td { padding: 8px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); vertica
 </div>
 
 <script>
-/* --- LOGIKA ÉRINTETLEN --- */
+/* --- A LOGIKA SZIGORÚAN VÁLTOZATLAN --- */
 let allData = [];
 
 document.getElementById('fileInput').addEventListener('change', function(e) {
@@ -333,11 +364,11 @@ function updateView() {
     
     document.getElementById('totalFelv').innerText = stats.felv.toLocaleString();
     const rateF = stats.beult > 0 ? ((stats.felv / stats.beult) * 100).toFixed(2) : "0.00";
-    document.getElementById('rateFelv').innerText = `${rateF}% a termeléshez képest`;
+    document.getElementById('rateFelv').innerText = `${rateF}% arány`;
 
     document.getElementById('totalKam').innerText = stats.kam.toLocaleString();
     const rateK = stats.beult > 0 ? ((stats.kam / stats.beult) * 100).toFixed(2) : "0.00";
-    document.getElementById('rateKam').innerText = `${rateK}% a termeléshez képest`;
+    document.getElementById('rateKam').innerText = `${rateK}% arány`;
 
     renderTable('tableFelv', stats.dF, stats.dInfo, stats.felv, limit, 'worstFelvBadge', 'var(--danger)');
     renderTable('tableKam', stats.dK, stats.dInfo, stats.kam, limit, 'worstKamBadge', 'var(--warning)');
@@ -349,28 +380,27 @@ function renderTable(tableId, dataDict, infoDict, totalError, limit, badgeId, co
 
     const sorted = Object.entries(dataDict).sort((a, b) => b[1] - a[1]);
 
-    // Badge frissítése
     if (sorted.length > 0) {
         document.getElementById(badgeId).innerText = `Top 1: ${sorted[0][0]}`;
     } else {
         document.getElementById(badgeId).innerText = "-";
     }
 
-    const maxVal = sorted.length > 0 ? sorted[0][1] : 1; // Skálázáshoz
+    const maxVal = sorted.length > 0 ? sorted[0][1] : 1;
 
     sorted.slice(0, limit).forEach((item, idx) => {
         const val = item[1];
         const percentOfTotal = totalError > 0 ? ((val / totalError) * 100).toFixed(1) : 0;
-        const widthPercent = (val / maxVal) * 100; // Bar szélesség a legnagyobboz képest
+        const widthPercent = (val / maxVal) * 100;
 
         const row = `
         <tr>
             <td class="rank-idx">${idx + 1}.</td>
             <td>
                 <div class="part-num">${item[0]}</div>
-                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+                <div style="font-size:0.7rem; color:var(--text-muted); margin-top:1px;">
                     <span class="badge">${infoDict[item[0]] || '-'}</span> 
-                    <span style="margin-left:5px;">Részarány: ${percentOfTotal}%</span>
+                    <span style="margin-left:5px;">${percentOfTotal}% össz. hibából</span>
                 </div>
                 <div class="bar-container">
                     <div class="bar-fill" style="width:${widthPercent}%; background:${color};"></div>
@@ -385,7 +415,7 @@ function renderTable(tableId, dataDict, infoDict, totalError, limit, badgeId, co
     });
 
     if (sorted.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--text-muted);">Nincs hiba adat</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; color:var(--text-muted);">Nincs hiba adat</td></tr>';
     }
 }
 </script>
