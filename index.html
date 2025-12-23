@@ -118,6 +118,21 @@ transition: transform 0.2s;
 .menu-fab:active { transform: scale(0.9); }
 .menu-fab span { font-size: 28px; color: white; line-height: 1; }
 
+/* --- ÚJ FRISSÍTÉS GOMB (JOBB FELSŐ SAROK) --- */
+.refresh-fab {
+position: fixed; top: 20px; right: 20px;
+width: 45px; height: 45px; /* Kicsit kisebb mint a menü */
+background: rgba(30, 41, 59, 0.8); /* Sötét, félig áttetsző */
+backdrop-filter: blur(5px);
+border-radius: 50%; display: flex; align-items: center; justify-content: center;
+box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+cursor: pointer; z-index: 2147483647;
+border: 1px solid var(--border);
+transition: all 0.3s;
+}
+.refresh-fab:active { transform: rotate(180deg) scale(0.9); }
+.refresh-fab span { font-size: 22px; color: var(--accent); line-height: 1; font-weight: bold; }
+
 .overlay {
 display: none; position: fixed; inset: 0;
 background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 1500;
@@ -173,6 +188,10 @@ Ez a verzió laptop és telefon kijelzőre lett optimalizálva.
 
 <footer>Szoftverfejlesztő:<br><strong style="color:white">GERGŐ ROLAND</strong><br>2026</footer>
 </aside>
+
+<div class="refresh-fab" onclick="window.location.reload()">
+<span>↻</span>
+</div>
 
 <div class="menu-fab" id="menuFab" onclick="toggleMenu()">
 <span id="menuIcon">☰</span>
