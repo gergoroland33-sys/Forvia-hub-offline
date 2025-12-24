@@ -10,59 +10,87 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f1a; color: #e2e8f0; margin: 0; overflow: hidden; /* A body ne görgessen, csak a táblázat */ }
+        /* ALAP SZERKEZET: Teljes képernyő, nincs görgetés a body-n */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0b0f1a; 
+            color: #e2e8f0; 
+            margin: 0; 
+            height: 100vh; /* Teljes magasság */
+            overflow: hidden; /* Body nem göröghet */
+            display: flex;
+            flex-direction: column;
+        }
         
-        header { background: linear-gradient(to bottom, #111827, #0f172a); border-bottom: 1px solid #1e293b; height: auto; min-height: 120px; }
+        /* A fejléc fix magasságú, nem görög */
+        header { 
+            flex: none; 
+            background: linear-gradient(to bottom, #111827, #0f172a); 
+            border-bottom: 1px solid #1e293b; 
+            z-index: 60;
+        }
         
-        /* --- TÁBLÁZAT KEZELÉS --- */
+        /* A tartalom kitölti a maradék helyet */
+        main { 
+            flex-grow: 1; 
+            position: relative; 
+            overflow: hidden; 
+            background: #111827;
+        }
+
+        /* TÁBLÁZAT KONTÉNER: Ez az egyetlen ami göröghet */
         .table-container { 
-            /* MOBIL FIX: A képernyő maradék részét töltse ki, így görgethető marad */
-            height: calc(100vh - 190px); 
-            width: 100%;
-            overflow: auto; /* Görgetés engedélyezése minden irányba */
-            background: #111827; 
-            border-top: 1px solid #1e293b;
-            -webkit-overflow-scrolling: touch; /* Sima görgetés iOS-en */
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            overflow: auto; /* Görgetés engedélyezése */
+            -webkit-overflow-scrolling: touch; /* Sima görgetés mobilra */
         }
 
         .matrix-table { border-collapse: separate; border-spacing: 0; }
         
-        /* Fejléc rögzítése */
+        /* 1. RÖGZÍTÉS: DÁTUM SOR (Függőleges görgetésnél marad) */
         .matrix-table thead th {
             position: sticky;
             top: 0;
             z-index: 30;
             background: #1e293b;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.5);
             height: 40px;
         }
 
-        /* Név oszlop rögzítése bal oldalon */
+        /* 2. RÖGZÍTÉS: NÉV OSZLOP (Vízszintes görgetésnél marad) */
         .name-col { 
             position: sticky; 
             left: 0; 
             background: #1e293b; 
             z-index: 40; 
             min-width: 140px; 
-            max-width: 140px; /* Mobilon ne legyen túl széles */
+            max-width: 140px;
             border-right: 3px solid #3b82f6 !important; 
             cursor: grab;
             padding: 0 5px !important;
+            /* Fontos: fedje el a mögötte elcsúszó tartalmat */
         }
 
-        /* Bal felső sarok mindig felül */
-        .matrix-table thead th.name-col { z-index: 50 !important; background: #1e293b; }
+        /* 3. RÖGZÍTÉS: BAL FELSŐ SAROK (Mindig marad) */
+        .matrix-table thead th.name-col { 
+            z-index: 50 !important; 
+            background: #1e293b; 
+            border-bottom: 1px solid #2d3748;
+        }
 
+        /* Fix szélességű adat oszlopok */
         .data-col-fix {
-            min-width: 60px !important;
-            max-width: 60px !important;
-            width: 60px !important;
+            min-width: 60px !important; width: 60px !important;
         }
+        /* Ha a fejlécben vannak, ők is legyenek sticky-k, de a Név alatt */
+        .matrix-table thead th.data-col-fix { z-index: 30; }
+
 
         .matrix-table th, .matrix-table td { 
             border: 1px solid #2d3748; 
             min-width: 42px; 
-            height: 45px; 
+            height: 48px; /* Kicsit nagyobb érintési felület */
             text-align: center; 
             font-size: 13px; 
         }
@@ -87,7 +115,10 @@
 
         /* Hétvége és ünnepnap stílus */
         .weekend { background: #141b2d !important; color: #64748b; }
-        .holiday-header { color: #ef4444 !important; font-weight: 900 !important; } /* Piros dátum a fejlécben */
+        
+        /* ÜNNEPNAP STÍLUSOK - Kifejezetten a kérésre */
+        .holiday-bg { background: #1f1515 !important; } /* Sötétvörös háttér */
+        .holiday-text { color: #ef4444 !important; font-weight: 900 !important; font-size: 12px !important; } /* Piros szám */
 
         .shift-btn { transition: all 0.3s; border: 1px solid #334155; }
         .shift-btn.active { transform: scale(1.05); color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
@@ -98,18 +129,19 @@
 
         @media print {
             .no-print { display: none !important; }
-            body { background: white !important; color: black !important; overflow: visible !important; }
+            body { height: auto !important; overflow: visible !important; display: block !important; background: white !important; color: black !important; }
             #print-area { display: block !important; }
             table { border-collapse: collapse; border: 2px solid black; }
             th, td { border: 1px solid black !important; color: black !important; }
-            .table-container { height: auto !important; overflow: visible !important; }
+            .table-container { position: static !important; overflow: visible !important; height: auto !important; }
+            main { overflow: visible !important; }
         }
     </style>
 </head>
 <body class="pb-0">
     <div id="print-area" class="hidden"></div>
 
-    <header class="p-2 sticky top-0 z-[60] no-print shadow-xl flex flex-col gap-2 justify-center">
+    <header class="p-2 no-print shadow-xl flex flex-col gap-2">
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col">
                 <span class="text-blue-500 font-black text-xl tracking-tighter leading-none">FORVIA</span>
@@ -145,7 +177,7 @@
         </div>
     </header>
 
-    <main class="no-print w-full h-full relative">
+    <main class="no-print">
         <div id="v-matrix" class="w-full h-full">
             <div class="table-container shadow-2xl">
                 <table class="matrix-table" id="mainTable">
@@ -155,7 +187,7 @@
             </div>
         </div>
         
-        <div id="v-stats" class="hidden p-4 overflow-y-auto" style="height: calc(100vh - 130px);">
+        <div id="v-stats" class="hidden absolute inset-0 overflow-y-auto p-4 bg-[#0b0f1a]">
             <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-10"></div>
         </div>
     </main>
@@ -167,7 +199,7 @@
         let employees = [];
         const monthNames = ["Január", "Február", "Március", "Április", "Május", "Június", "Július", "Augusztus", "Szeptember", "Október", "November", "December"];
         
-        // Ünnepnapok 2026 (Hónap-Nap formátum, a hónap 1-től indul itt)
+        // Ünnepnapok 2026 (Hónap-Nap, 1-es alapú)
         const holidays2026 = [
             "1-1",   // Újév
             "3-15",  // Nemzeti ünnep
@@ -258,10 +290,9 @@
                 <th class="data-col-fix bg-slate-800 text-emerald-400 border-b border-slate-700 border-r-4 border-r-slate-900">KIV</th>`;
             
             for(let d=1; d<=days; d++) {
-                // Ünnepnap ellenőrzés
                 const isHoliday = holidays2026.includes(`${m+1}-${d}`);
-                // Ha ünnepnap, kapjon piros színt a fejlécben
-                const headerClass = isHoliday ? 'holiday-header' : '';
+                // Ha ünnepnap, holiday-text osztályt kap a szám
+                const headerClass = isHoliday ? 'holiday-text' : '';
                 h += `<th class="${headerClass}">${d}</th>`;
             }
             document.getElementById('tHead').innerHTML = h + "</tr>";
@@ -286,11 +317,13 @@
                     const isWeekend = [0,6].includes(dayObj.getDay());
                     const isHoliday = holidays2026.includes(`${m+1}-${d}`);
                     
-                    // Ha hétvége VAGY ünnepnap, akkor sötét háttér (.weekend)
-                    const isOffDay = isWeekend || isHoliday;
+                    // Alapból üres vagy weekend osztály
+                    let bgClass = isWeekend ? 'weekend' : '';
+                    // Ha ünnepnap, akkor felülírja a weekendet holiday-bg-re
+                    if (isHoliday) bgClass = 'holiday-bg weekend'; 
                     
                     const cls = (v && !isNaN(parseFloat(v.replace(',','.')))) ? 'cell-S' : (v==='BÁ'?'cell-BA':v==='IG'?'cell-IG':v==='TU'?'cell-TU':v.startsWith('KÉ')?'cell-KE':'');
-                    row += `<td class="${isOffDay?'weekend':''} ${cls}"><input type="text" value="${v}" onfocus="this.select(); highlight(this,${d},true)" onblur="highlight(this,${d},false); update(${e.id},'${k}',this.value,this)" class="input-cell"></td>`;
+                    row += `<td class="${bgClass} ${cls}"><input type="text" value="${v}" onfocus="this.select(); highlight(this,${d},true)" onblur="highlight(this,${d},false); update(${e.id},'${k}',this.value,this)" class="input-cell"></td>`;
                 }
                 return row + "</tr>";
             }).join('');
