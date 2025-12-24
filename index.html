@@ -54,13 +54,13 @@ color: white; letter-spacing: -1px; margin-bottom: 5px;
 color: var(--text-dim); font-size: 0.9rem; margin-bottom: 25px; font-weight: 500;
 }
 
-/* SZIKLASZILÁRD SZÁMLÁLÓ STÍLUS */
+/* SZÁMKIJELZŐ STÍLUS */
 .visitor-box {
 background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 12px;
 display: inline-block; margin-bottom: 20px; border: 1px solid rgba(59, 130, 246, 0.3);
 }
 .visitor-label { font-size: 10px; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; display: block; margin-bottom: 8px; }
-.visitor-img { height: 22px; border-radius: 4px; }
+.visitor-img { height: 24px; }
 
 .instruction-text {
 font-size: 1rem; line-height: 1.6; color: #e2e8f0; margin-bottom: 30px;
@@ -95,10 +95,7 @@ border-bottom: 1px solid var(--border);
 background: rgba(255,255,255,0.02);
 }
 .sidebar-header h2 {
-font-size: 1.3rem;
-margin: 0;
-letter-spacing: 1px;
-font-weight: 700;
+font-size: 1.3rem; margin: 0; letter-spacing: 1px; font-weight: 700;
 }
 
 .nav-list { padding: 20px; flex-grow: 1; overflow-y: auto; }
@@ -159,7 +156,7 @@ footer { padding: 20px; border-top: 1px solid var(--border); text-align: center;
 
 <div class="visitor-box">
 <span class="visitor-label">Mai látogatások száma</span>
-<img id="hit-img" class="visitor-img" src="https://img.shields.io/badge/betöltés-0F172A" alt="stat">
+<img id="hit-img" class="visitor-img" src="" alt="loading...">
 </div>
 
 <p class="instruction-text">
@@ -214,12 +211,12 @@ function updateInfo() {
                     String(now.getDate()).padStart(2, '0') + ".";
     document.getElementById('display-date').innerText = dateStr;
 
-    // SHIELDS.IO + MOZILLA API (A leggyorsabb párosítás)
-    const dailyKey = "fh_" + now.getFullYear() + (now.getMonth()+1) + now.getDate();
+    // Napi kulcs generálása
+    const dailyKey = "forvia_" + now.getFullYear() + (now.getMonth()+1) + now.getDate();
     const cacheBuster = Math.floor(Math.random() * 1000);
     
-    // Ez a link közvetlenül a statisztikát kéri le képként
-    const hitUrl = `https://img.shields.io/badge/dynamic/json?color=10b981&label=MAI&query=value&url=https%3A%2F%2Fapi.countapi.xyz%2Fhit%2Fgergoroland_forviahub%2F${dailyKey}%3Fcb%3D${cacheBuster}&style=flat-square`;
+    // Visitor Badge - Ez a szerver szinte 100% rendelkezésre állású
+    const hitUrl = `https://visitor-badge.laobi.icu/badge?page_id=gergoroland_hub_${dailyKey}&color=10b981&lcolor=1e293b&style=flat-square&t=${cacheBuster}`;
     
     document.getElementById('hit-img').src = hitUrl;
 }
