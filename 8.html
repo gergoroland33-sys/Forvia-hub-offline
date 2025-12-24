@@ -10,48 +10,64 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f1a; color: #e2e8f0; margin: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f1a; color: #e2e8f0; margin: 0; overflow: hidden; /* A body ne görgessen, csak a táblázat */ }
         
-        header { background: linear-gradient(to bottom, #111827, #0f172a); border-bottom: 1px solid #1e293b; }
+        header { background: linear-gradient(to bottom, #111827, #0f172a); border-bottom: 1px solid #1e293b; height: auto; min-height: 120px; }
         
+        /* --- TÁBLÁZAT KEZELÉS --- */
         .table-container { 
-            overflow-x: auto; 
-            border-radius: 12px; 
+            /* MOBIL FIX: A képernyő maradék részét töltse ki, így görgethető marad */
+            height: calc(100vh - 190px); 
+            width: 100%;
+            overflow: auto; /* Görgetés engedélyezése minden irányba */
             background: #111827; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid #1e293b;
+            border-top: 1px solid #1e293b;
+            -webkit-overflow-scrolling: touch; /* Sima görgetés iOS-en */
         }
 
-        .matrix-table { border-collapse: separate; border-spacing: 0; width: 100%; }
+        .matrix-table { border-collapse: separate; border-spacing: 0; }
         
+        /* Fejléc rögzítése */
+        .matrix-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: #1e293b;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            height: 40px;
+        }
+
+        /* Név oszlop rögzítése bal oldalon */
         .name-col { 
             position: sticky; 
             left: 0; 
             background: #1e293b; 
             z-index: 40; 
-            min-width: 180px; 
+            min-width: 140px; 
+            max-width: 140px; /* Mobilon ne legyen túl széles */
             border-right: 3px solid #3b82f6 !important; 
             cursor: grab;
-            padding: 0 12px !important;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+            padding: 0 5px !important;
         }
 
-        /* ÚJ: Fix szélességű adat oszlopok, hogy kiférjen a szám */
+        /* Bal felső sarok mindig felül */
+        .matrix-table thead th.name-col { z-index: 50 !important; background: #1e293b; }
+
         .data-col-fix {
-            min-width: 70px !important;
-            max-width: 70px !important;
-            width: 70px !important;
+            min-width: 60px !important;
+            max-width: 60px !important;
+            width: 60px !important;
         }
 
         .matrix-table th, .matrix-table td { 
             border: 1px solid #2d3748; 
             min-width: 42px; 
-            height: 42px; 
+            height: 45px; 
             text-align: center; 
             font-size: 13px; 
         }
 
-        .matrix-table th { background: #1e293b; color: #94a3b8; font-weight: 700; text-transform: uppercase; font-size: 11px; }
+        .matrix-table th { color: #94a3b8; font-weight: 700; text-transform: uppercase; font-size: 11px; }
 
         .row-highlight { background: rgba(59, 130, 246, 0.25) !important; }
         .col-highlight { background: rgba(59, 130, 246, 0.25) !important; }
@@ -63,26 +79,17 @@
         .cell-KE { background: #d97706 !important; color: white !important; font-weight: 900; }
         
         .input-cell { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-            text-align: center; 
-            background: transparent; 
-            color: white; 
-            font-weight: 800; 
-            outline: none; 
-            font-size: 16px; 
+            width: 100%; height: 100%; border: none; text-align: center; background: transparent; 
+            color: white; font-weight: 800; outline: none; font-size: 16px; 
         }
 
-        .quota-input {
-            font-size: 15px !important;
-            font-weight: 900 !important;
-            color: #93c5fd !important;
-        }
+        .quota-input { font-size: 15px !important; font-weight: 900 !important; color: #93c5fd !important; }
 
+        /* Hétvége és ünnepnap stílus */
         .weekend { background: #141b2d !important; color: #64748b; }
+        .holiday-header { color: #ef4444 !important; font-weight: 900 !important; } /* Piros dátum a fejlécben */
 
-        .shift-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #334155; }
+        .shift-btn { transition: all 0.3s; border: 1px solid #334155; }
         .shift-btn.active { transform: scale(1.05); color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
         .shift-A.active { background: #ef4444; border-color: #f87171; }
         .shift-B.active { background: #10b981; border-color: #34d399; }
@@ -91,67 +98,66 @@
 
         @media print {
             .no-print { display: none !important; }
-            body { background: white !important; color: black !important; }
+            body { background: white !important; color: black !important; overflow: visible !important; }
             #print-area { display: block !important; }
             table { border-collapse: collapse; border: 2px solid black; }
             th, td { border: 1px solid black !important; color: black !important; }
+            .table-container { height: auto !important; overflow: visible !important; }
         }
     </style>
 </head>
-<body class="pb-20">
+<body class="pb-0">
     <div id="print-area" class="hidden"></div>
 
-    <header class="p-4 sticky top-0 z-50 no-print">
-        <div class="max-w-full mx-auto flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center gap-4">
-                <div class="flex flex-col">
-                    <span class="text-blue-500 font-black text-2xl tracking-tighter leading-none">FORVIA</span>
-                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Staff Pro 2026</span>
-                </div>
-                <div class="flex bg-slate-900/80 p-1.5 rounded-xl gap-1.5 border border-slate-700/50 backdrop-blur-md">
-                    <button onclick="changeShift('A')" id="btn-shift-A" class="shift-btn shift-A px-4 py-1.5 rounded-lg text-xs font-black uppercase">A</button>
-                    <button onclick="changeShift('B')" id="btn-shift-B" class="shift-btn shift-B px-4 py-1.5 rounded-lg text-xs font-black uppercase">B</button>
-                    <button onclick="changeShift('C')" id="btn-shift-C" class="shift-btn shift-C px-4 py-1.5 rounded-lg text-xs font-black uppercase">C</button>
-                    <button onclick="changeShift('D')" id="btn-shift-D" class="shift-btn shift-D px-4 py-1.5 rounded-lg text-xs font-black uppercase">D</button>
-                </div>
+    <header class="p-2 sticky top-0 z-[60] no-print shadow-xl flex flex-col gap-2 justify-center">
+        <div class="flex justify-between items-center w-full">
+            <div class="flex flex-col">
+                <span class="text-blue-500 font-black text-xl tracking-tighter leading-none">FORVIA</span>
+                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Staff Pro 2026</span>
+            </div>
+            <div class="flex bg-slate-900/80 p-1 rounded-lg gap-1 border border-slate-700/50">
+                <button onclick="changeShift('A')" id="btn-shift-A" class="shift-btn shift-A px-3 py-1.5 rounded text-[10px] font-black uppercase">A</button>
+                <button onclick="changeShift('B')" id="btn-shift-B" class="shift-btn shift-B px-3 py-1.5 rounded text-[10px] font-black uppercase">B</button>
+                <button onclick="changeShift('C')" id="btn-shift-C" class="shift-btn shift-C px-3 py-1.5 rounded text-[10px] font-black uppercase">C</button>
+                <button onclick="changeShift('D')" id="btn-shift-D" class="shift-btn shift-D px-3 py-1.5 rounded text-[10px] font-black uppercase">D</button>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between w-full gap-2 overflow-x-auto pb-1">
+            <div id="sync" class="bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded-full text-[9px] font-black border border-emerald-500/20 whitespace-nowrap">
+                ONLINE
+            </div>
+            
+            <div class="flex items-center bg-slate-900/80 border border-slate-700/50 rounded-lg p-0.5">
+                <button onclick="changeMonth(-1)" class="p-2 text-blue-400 hover:text-white"><i class="fas fa-chevron-left text-xs"></i></button>
+                <span id="monthDisp" class="font-black text-xs uppercase w-20 text-center text-blue-400 tracking-widest">Jan</span>
+                <button onclick="changeMonth(1)" class="p-2 text-blue-400 hover:text-white"><i class="fas fa-chevron-right text-xs"></i></button>
             </div>
 
-            <div class="flex items-center gap-3">
-                <div id="sync" class="bg-emerald-500/10 text-emerald-500 px-3 py-1.5 rounded-full text-[10px] font-black border border-emerald-500/20">
-                    <i class="fas fa-cloud mr-1"></i> ONLINE
-                </div>
-                <div class="flex items-center bg-slate-900/80 border border-slate-700/50 rounded-xl p-1">
-                    <button onclick="changeMonth(-1)" class="p-2 hover:text-blue-400 transition"><i class="fas fa-chevron-left text-xs"></i></button>
-                    <span id="monthDisp" class="font-black text-xs uppercase w-28 text-center text-blue-400 tracking-widest">Január</span>
-                    <button onclick="changeMonth(1)" class="p-2 hover:text-blue-400 transition"><i class="fas fa-chevron-right text-xs"></i></button>
-                </div>
-                <div class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-700/50">
-                    <button onclick="setView('matrix')" id="nav-m" class="px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all">Mátrix</button>
-                    <button onclick="setView('stats')" id="nav-s" class="px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ml-1">Adatlapok</button>
-                </div>
-                <button onclick="addEmp()" class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-xl text-[10px] font-black uppercase text-white shadow-lg shadow-blue-600/20 transition-all">+ Új tag</button>
+            <div class="flex bg-slate-900/80 p-0.5 rounded-lg border border-slate-700/50">
+                <button onclick="setView('matrix')" id="nav-m" class="px-3 py-1.5 rounded text-[10px] font-black uppercase"><i class="fas fa-table"></i></button>
+                <button onclick="setView('stats')" id="nav-s" class="px-3 py-1.5 rounded text-[10px] font-black uppercase ml-1"><i class="fas fa-id-card"></i></button>
             </div>
+            
+            <button onclick="addEmp()" class="bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase text-white shadow-lg shadow-blue-600/20 whitespace-nowrap">
+                 <i class="fas fa-plus"></i>
+            </button>
         </div>
     </header>
 
-    <main class="p-4 no-print">
-        <div id="v-matrix">
+    <main class="no-print w-full h-full relative">
+        <div id="v-matrix" class="w-full h-full">
             <div class="table-container shadow-2xl">
                 <table class="matrix-table" id="mainTable">
                     <thead id="tHead"></thead>
                     <tbody id="tBody"></tbody>
                 </table>
             </div>
-
-            <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3 p-5 bg-slate-900/40 rounded-2xl border border-slate-800/60">
-                <div class="flex items-center gap-3 text-[11px] font-bold text-slate-400"><div class="w-5 h-5 rounded-lg cell-S shadow-lg shadow-emerald-600/20"></div> SZABADSÁG</div>
-                <div class="flex items-center gap-3 text-[11px] font-bold text-slate-400"><div class="w-5 h-5 rounded-lg cell-BA shadow-lg shadow-orange-600/20"></div> BETEGÁLLOMÁNY</div>
-                <div class="flex items-center gap-3 text-[11px] font-bold text-slate-400"><div class="w-5 h-5 rounded-lg cell-IG shadow-lg shadow-violet-600/20"></div> IGAZOLT HIÁNY</div>
-                <div class="flex items-center gap-3 text-[11px] font-bold text-slate-400"><div class="w-5 h-5 rounded-lg cell-TU shadow-lg shadow-blue-600/20"></div> TANULMÁNYI</div>
-                <div class="flex items-center gap-3 text-[11px] font-bold text-slate-400"><div class="w-5 h-5 rounded-lg cell-KE shadow-lg shadow-amber-600/20"></div> KÉPZÉS</div>
-            </div>
         </div>
-        <div id="v-stats" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-4"></div>
+        
+        <div id="v-stats" class="hidden p-4 overflow-y-auto" style="height: calc(100vh - 130px);">
+            <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-10"></div>
+        </div>
     </main>
 
     <script>
@@ -160,6 +166,21 @@
         let date = new Date(2026, 0, 1);
         let employees = [];
         const monthNames = ["Január", "Február", "Március", "Április", "Május", "Június", "Július", "Augusztus", "Szeptember", "Október", "November", "December"];
+        
+        // Ünnepnapok 2026 (Hónap-Nap formátum, a hónap 1-től indul itt)
+        const holidays2026 = [
+            "1-1",   // Újév
+            "3-15",  // Nemzeti ünnep
+            "4-3",   // Nagypéntek
+            "4-6",   // Húsvéthétfő
+            "5-1",   // Munka ünnepe
+            "5-25",  // Pünkösdhétfő
+            "8-20",  // Államalapítás
+            "10-23", // '56-os forradalom
+            "11-1",  // Mindenszentek
+            "12-25", // Karácsony
+            "12-26"  // Karácsony
+        ];
 
         async function changeShift(s) {
             currentShift = s;
@@ -180,10 +201,10 @@
         }
 
         async function save() {
-            document.getElementById('sync').innerHTML = '<i class="fas fa-sync fa-spin mr-1"></i> MENTÉS...';
+            document.getElementById('sync').innerHTML = '<i class="fas fa-spin fa-sync"></i>';
             try {
                 await fetch(`${DB}shift_${currentShift}.json`, { method: 'PUT', body: JSON.stringify(employees) });
-                document.getElementById('sync').innerHTML = '<i class="fas fa-cloud mr-1"></i> ONLINE';
+                document.getElementById('sync').innerHTML = 'ONLINE';
             } catch(e) { document.getElementById('sync').innerText = "HIBA!"; }
         }
 
@@ -231,18 +252,23 @@
             const days = new Date(2026, m+1, 0).getDate();
             document.getElementById('monthDisp').innerText = monthNames[m];
 
-            // JAVÍTÁS: data-col-fix osztály a szélesebb oszlopokért
             let h = `<tr>
-                <th class="name-col">Munkatárs</th>
+                <th class="name-col">Név</th>
                 <th class="data-col-fix bg-slate-800 text-blue-300 border-b border-slate-700">KERET</th>
                 <th class="data-col-fix bg-slate-800 text-emerald-400 border-b border-slate-700 border-r-4 border-r-slate-900">KIV</th>`;
-            for(let d=1; d<=days; d++) h += `<th>${d}</th>`;
+            
+            for(let d=1; d<=days; d++) {
+                // Ünnepnap ellenőrzés
+                const isHoliday = holidays2026.includes(`${m+1}-${d}`);
+                // Ha ünnepnap, kapjon piros színt a fejlécben
+                const headerClass = isHoliday ? 'holiday-header' : '';
+                h += `<th class="${headerClass}">${d}</th>`;
+            }
             document.getElementById('tHead').innerHTML = h + "</tr>";
 
             document.getElementById('tBody').innerHTML = employees.map(e => {
                 let s = 0; if(e.data) Object.values(e.data).forEach(v => { let n=parseFloat(String(v).replace(',','.')); if(!isNaN(n)) s+=n; });
                 
-                // JAVÍTÁS: data-col-fix osztály használata a body-ban is
                 let row = `<tr data-id="${e.id}"><td class="name-col flex justify-between items-center">
                     <span class="font-black text-[12px] tracking-tight truncate uppercase text-white">${e.name}</span>
                     <button onclick="delEmp(${e.id})" class="text-red-500/30 hover:text-red-500 transition-colors p-1"><i class="fas fa-times-circle"></i></button>
@@ -256,9 +282,15 @@
                 
                 for(let d=1; d<=days; d++) {
                     const k = `2026-${m+1}-${d}`, v = (e.data && e.data[k]) ? e.data[k] : "";
-                    const isW = [0,6].includes(new Date(2026,m,d).getDay());
+                    const dayObj = new Date(2026,m,d);
+                    const isWeekend = [0,6].includes(dayObj.getDay());
+                    const isHoliday = holidays2026.includes(`${m+1}-${d}`);
+                    
+                    // Ha hétvége VAGY ünnepnap, akkor sötét háttér (.weekend)
+                    const isOffDay = isWeekend || isHoliday;
+                    
                     const cls = (v && !isNaN(parseFloat(v.replace(',','.')))) ? 'cell-S' : (v==='BÁ'?'cell-BA':v==='IG'?'cell-IG':v==='TU'?'cell-TU':v.startsWith('KÉ')?'cell-KE':'');
-                    row += `<td class="${isW?'weekend':''} ${cls}"><input type="text" value="${v}" onfocus="this.select(); highlight(this,${d},true)" onblur="highlight(this,${d},false); update(${e.id},'${k}',this.value,this)" class="input-cell"></td>`;
+                    row += `<td class="${isOffDay?'weekend':''} ${cls}"><input type="text" value="${v}" onfocus="this.select(); highlight(this,${d},true)" onblur="highlight(this,${d},false); update(${e.id},'${k}',this.value,this)" class="input-cell"></td>`;
                 }
                 return row + "</tr>";
             }).join('');
@@ -300,12 +332,12 @@
         function setView(v) {
             document.getElementById('v-matrix').classList.toggle('hidden', v !== 'matrix');
             document.getElementById('v-stats').classList.toggle('hidden', v !== 'stats');
-            document.getElementById('nav-m').className = v === 'matrix' ? "px-4 py-2 rounded-lg text-[10px] font-black uppercase bg-blue-600 text-white" : "px-4 py-2 rounded-lg text-[10px] font-black uppercase text-slate-400 hover:text-white";
-            document.getElementById('nav-s').className = v === 'stats' ? "px-4 py-2 rounded-lg text-[10px] font-black uppercase bg-blue-600 text-white" : "px-4 py-2 rounded-lg text-[10px] font-black uppercase text-slate-400 hover:text-white";
+            
+            document.getElementById('nav-m').className = v === 'matrix' ? "px-3 py-1.5 rounded text-[10px] font-black uppercase bg-blue-600 text-white" : "px-3 py-1.5 rounded text-[10px] font-black uppercase text-slate-400 hover:text-white";
+            document.getElementById('nav-s').className = v === 'stats' ? "px-3 py-1.5 rounded text-[10px] font-black uppercase bg-blue-600 text-white" : "px-3 py-1.5 rounded text-[10px] font-black uppercase text-slate-400 hover:text-white";
             
             if(v==='stats') {
-                document.getElementById('v-stats').innerHTML = employees.map(e => {
-                    // JAVÍTOTT STATISZTIKA SZÁMOLÁS A KÁRTYÁKHOZ
+                document.getElementById('stats-grid').innerHTML = employees.map(e => {
                     let totals = { S:0, BA:0, IG:0, TU:0, KE:0 };
                     if(e.data) Object.values(e.data).forEach(val => {
                         let n = parseFloat(String(val).replace(',','.'));
